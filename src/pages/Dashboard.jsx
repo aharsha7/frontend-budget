@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BudgetCards from "../components/BudgetCards";
@@ -19,14 +20,16 @@ function Dashboard() {
 
   useEffect(() => {
     if (!token) {
-      navigate("/"); // Redirect to login if no token is found
+      navigate("/");
+    } else {
+      fetchTransactions(); // Fetch on load
     }
   }, [token, navigate]);
 
-  const refreshTransactions = async () => {
+  const fetchTransactions = async () => {
     try {
       const res = await api.get("/transactions/get");
-      setTransactions(res.data); // Update state with the latest transactions
+      setTransactions(res.data);
     } catch (err) {
       console.error("Failed to fetch transactions:", err);
     }
@@ -43,8 +46,7 @@ function Dashboard() {
     setShowUpdateTransactionModal(true);
   };
 
-  const closeUpdateTransactionModal = () =>
-    setShowUpdateTransactionModal(false);
+  const closeUpdateTransactionModal = () => setShowUpdateTransactionModal(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,19 +67,21 @@ function Dashboard() {
         <TransactionTable
           transactions={transactions}
           setTransactions={setTransactions}
+          onUpdateClick={openUpdateTransactionModal}
         />
 
         {/* Modals */}
         {showAddBudgetModal && (
           <AddBudgetModal
             closeModal={closeAddBudgetModal}
-            onBudgetAdded={refreshTransactions} // Pass the refresh function here
-            setTransactions={setTransactions}
+            onBudgetAdded={fetchTransactions}
           />
         )}
+
         {showAddCategoryModal && (
           <AddCategoryModal closeModal={closeAddCategoryModal} />
         )}
+
         {showUpdateTransactionModal && (
           <UpdateTransactionModal
             txnId={selectedTransactionId}

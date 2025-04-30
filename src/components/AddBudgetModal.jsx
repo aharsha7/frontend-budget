@@ -1,30 +1,34 @@
 import { useEffect, useState } from "react";
 import api from "../services/ApiUrl";
 
-function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
+function BudgetModal({ closeModal, onBudgetAdded, onBudgetUpdated, editData = null }) {
+  const isEditMode = !!editData;
+
   const [budgetForm, setBudgetForm] = useState({
     amount: "",
     transaction_type: "expense",
     category: "",
-    customCategory: "",
+    newCategory: "",
     description: "",
     date: "",
   });
 
   const [categories, setCategories] = useState([]);
-  const [addData, setAddData] = useState([]);
+  const [showCategoryError, setShowCategoryError] = useState(false);
 
-  // useEffect(() => {
-  //   const fetchCategories = async () => {
-  //     try {
-  //       const res = await api.get("/transactions/categories");
-  //       setCategories(res.data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch categories", error);
-  //     }
-  //   };
-  //   fetchCategories();
-  // }, []);
+  // Pre-fill in edit mode
+  useEffect(() => {
+    if (isEditMode && editData) {
+      setBudgetForm({
+        amount: editData.amount,
+        transaction_type: editData.transaction_type,
+        category: editData.category,
+        newCategory: "",
+        description: editData.description || "",
+        date: editData.date,
+      });
+    }
+  }, [editData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,16 +40,18 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const finalCategory = budgetForm.newCategory?.trim()
-      ? budgetForm.newCategory.trim()
-      : budgetForm.category;
-  
-    if (!finalCategory) {
-      alert("Please select or type a category");
+
+    const selectedCategory = budgetForm.category?.trim();
+    const typedCategory = budgetForm.newCategory?.trim();
+
+    if (!selectedCategory && !typedCategory) {
+      setShowCategoryError(true);
       return;
     }
-  
+    setShowCategoryError(false);
+
+    const finalCategory = typedCategory || selectedCategory;
+
     const budgetData = {
       amount: parseFloat(budgetForm.amount),
       transaction_type: budgetForm.transaction_type,
@@ -53,32 +59,33 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
       description: budgetForm.description,
       date: budgetForm.date,
     };
-  
+
     try {
-      const res = await api.post("/transactions/post", budgetData);
-      setAddData(res.data);
-      if (setTransactions) {
-        setTransactions((prev) => [...prev, res.data]);
-      }
-      if (onBudgetAdded) {
-        onBudgetAdded(res.data);
+      if (isEditMode) {
+        // Update transaction
+        await api.put(`/transactions/update/${editData.id}`, budgetData);
+        onBudgetUpdated && onBudgetUpdated();
+      } else {
+        // Add transaction
+        await api.post("/transactions/post", budgetData);
+        onBudgetAdded && onBudgetAdded();
       }
       closeModal();
     } catch (error) {
-      console.error("Failed to add budget:", error);
+      console.error("Failed to submit budget:", error);
     }
   };
-  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
       <div className="bg-white p-6 rounded-xl shadow-md w-96">
-        <h2 className="text-xl font-semibold mb-4">Add Budget</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          {isEditMode ? "Update Budget" : "Add Budget"}
+        </h2>
         <form onSubmit={handleSubmit}>
+          {/* Date */}
           <div className="mb-4">
-            <label htmlFor="date" className="block">
-              Date
-            </label>
+            <label className="block">Date</label>
             <input
               type="date"
               name="date"
@@ -89,10 +96,9 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
             />
           </div>
 
+          {/* Amount */}
           <div className="mb-4">
-            <label htmlFor="amount" className="block">
-              Amount
-            </label>
+            <label className="block">Amount</label>
             <input
               type="number"
               name="amount"
@@ -103,10 +109,9 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
             />
           </div>
 
+          {/* Type */}
           <div className="mb-4">
-            <label htmlFor="transaction_type" className="block">
-              Transaction Type
-            </label>
+            <label className="block">Transaction Type</label>
             <select
               name="transaction_type"
               value={budgetForm.transaction_type}
@@ -119,14 +124,11 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
             </select>
           </div>
 
+          {/* Category */}
           <div className="mb-4">
-            <label htmlFor="category" className="block mb-1">
-              Category
-            </label>
-
+            <label className="block mb-1">Category</label>
             <select
               name="category"
-              id="category"
               value={budgetForm.category}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded mb-2"
@@ -142,12 +144,16 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
                 </option>
               ))}
             </select>
-
+            {showCategoryError && (
+              <p className="text-red-500 text-sm mb-2">
+                Please select or type a category.
+              </p>
+            )}
             <input
               type="text"
               placeholder="Or type a new category"
               className="w-full p-2 border border-gray-300 rounded"
-              value={budgetForm.newCategory || ""}
+              value={budgetForm.newCategory}
               onChange={(e) =>
                 setBudgetForm((prev) => ({
                   ...prev,
@@ -157,25 +163,9 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
             />
           </div>
 
-          {/* Input field for custom category
+          {/* Description */}
           <div className="mb-4">
-            <label htmlFor="customCategory" className="block">
-              Or Add New Category
-            </label>
-            <input
-              type="text"
-              name="customCategory"
-              value={budgetForm.customCategory}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
-              placeholder="Type new category..."
-            />
-          </div> */}
-
-          <div className="mb-4">
-            <label htmlFor="description" className="block">
-              Description (Optional)
-            </label>
+            <label className="block">Description (Optional)</label>
             <textarea
               name="description"
               value={budgetForm.description}
@@ -184,6 +174,7 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
             />
           </div>
 
+          {/* Buttons */}
           <div className="flex justify-between">
             <button
               type="button"
@@ -196,7 +187,7 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
               type="submit"
               className="bg-green-500 text-white px-4 py-2 rounded"
             >
-              Add Budget
+              {isEditMode ? "Update Budget" : "Add Budget"}
             </button>
           </div>
         </form>
@@ -205,4 +196,4 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
   );
 }
 
-export default AddBudgetModal;
+export default BudgetModal;

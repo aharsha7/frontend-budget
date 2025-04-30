@@ -8,43 +8,18 @@ function UpdateTransactionModal({ closeModal, txnId }) {
   const [description, setDescription] = useState("");
   const [categories, setCategories] = useState([]);
 
-  useEffect(() => {
-    const fetchTransaction = async () => {
-      try {
-        const res = await api.get(`/transactions/${txnId}`);
-        setAmount(res.data.amount);
-        setTxnType(res.data.type);
-        setCategoryId(res.data.category_id);
-        setDescription(res.data.description || "");
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchTransaction();
-  }, [txnId]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await api.get("/transactions/categories");
-        setCategories(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchCategories();
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/transactions/${txnId}`, {
+
+      await api.get(`/transactions/put/${txnId}`, {
         amount,
         type: txnType,
         category_id: categoryId,
         description,
       });
-      closeModal(); // Close modal after success
+      closeModal(); 
     } catch (err) {
       console.error(err);
     }
