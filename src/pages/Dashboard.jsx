@@ -25,7 +25,7 @@ function Dashboard() {
 
   const refreshTransactions = async () => {
     try {
-      const res = await api.get("/transactions");
+      const res = await api.get("/transactions/get");
       setTransactions(res.data); // Update state with the latest transactions
     } catch (err) {
       console.error("Failed to fetch transactions:", err);

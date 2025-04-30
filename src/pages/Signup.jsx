@@ -50,8 +50,13 @@ function Signup() {
     }
 
     try {
-      const res = await api.post("/auth/signup", { name, email, password });
-      // http://localhost:5000/api/auth/login
+      const res = await api.post("/auth/signup", {
+        name,
+        email,
+        password,
+        confirm_password: password,  
+      });
+      
       console.log("Signup response:", res.data);
 
       if (!res.data || !res.data.token || !res.data.user) {
@@ -69,11 +74,12 @@ function Signup() {
     } catch (error) {
       console.error("Signup error:", error);
 
-      const msg = error.response?.data?.error || error.message;
+      const msg = error.response?.data?.message || error.response?.data?.error || error.message;
 
-      if (msg === "Email already exists") {
-        setErrors({ email: "Email already exists." });
-        notyf.error("Email already exists. Please try again.");
+      if (msg === "Email already registered") {
+        setErrors({ email: "Email already registered." });
+        notyf.error("Email already registered. Please try again.");
+
       } else {
         setErrors({ general: msg || "Signup failed. Please try again." });
         notyf.error(msg || "Signup failed. Please try again.");

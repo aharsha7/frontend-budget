@@ -6,25 +6,25 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
     amount: "",
     transaction_type: "expense",
     category: "",
-    newCategory: "",
+    customCategory: "",
     description: "",
     date: "",
   });
 
   const [categories, setCategories] = useState([]);
-  const [categoryError, setCategoryError] = useState(false); // State to track category validation
+  const [addData, setAddData] = useState([]);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await api.get("/transactions/categories");
-        setCategories(res.data);
-      } catch (error) {
-        console.error("Failed to fetch categories", error);
-      }
-    };
-    fetchCategories();
-  }, []);
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     try {
+  //       const res = await api.get("/transactions/categories");
+  //       setCategories(res.data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch categories", error);
+  //     }
+  //   };
+  //   fetchCategories();
+  // }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,23 +32,20 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
       ...prevForm,
       [name]: value,
     }));
-    if (name === "category" || name === "newCategory") {
-      setCategoryError(false); // Reset category error when user selects or types a category
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const finalCategory = budgetForm.newCategory?.trim()
       ? budgetForm.newCategory.trim()
       : budgetForm.category;
-
+  
     if (!finalCategory) {
-      setCategoryError(true); // Show validation message
+      alert("Please select or type a category");
       return;
     }
-
+  
     const budgetData = {
       amount: parseFloat(budgetForm.amount),
       transaction_type: budgetForm.transaction_type,
@@ -56,9 +53,10 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
       description: budgetForm.description,
       date: budgetForm.date,
     };
-
+  
     try {
       const res = await api.post("/transactions/post", budgetData);
+      setAddData(res.data);
       if (setTransactions) {
         setTransactions((prev) => [...prev, res.data]);
       }
@@ -70,6 +68,7 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
       console.error("Failed to add budget:", error);
     }
   };
+  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
@@ -156,13 +155,22 @@ function AddBudgetModal({ closeModal, onBudgetAdded, setTransactions }) {
                 }))
               }
             />
-
-            {categoryError && (
-              <p className="text-red-500 text-sm mt-2">
-                Please select or add any category.
-              </p>
-            )}
           </div>
+
+          {/* Input field for custom category
+          <div className="mb-4">
+            <label htmlFor="customCategory" className="block">
+              Or Add New Category
+            </label>
+            <input
+              type="text"
+              name="customCategory"
+              value={budgetForm.customCategory}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded"
+              placeholder="Type new category..."
+            />
+          </div> */}
 
           <div className="mb-4">
             <label htmlFor="description" className="block">

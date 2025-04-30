@@ -22,7 +22,6 @@ function TransactionTable() {
       const res = await api.get("/transactions/get");
 
       console.log(res.data, "res");
-      //localhost:5000/api/transactions/get
       setTransactions(res.data);
     } catch (err) {
       console.error(err);
