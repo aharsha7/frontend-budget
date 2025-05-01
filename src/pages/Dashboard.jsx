@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BudgetCards from "../components/BudgetCards";
@@ -12,7 +11,8 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [showAddBudgetModal, setShowAddBudgetModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
-  const [showUpdateTransactionModal, setShowUpdateTransactionModal] = useState(false);
+  const [showUpdateTransactionModal, setShowUpdateTransactionModal] =
+    useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
 
   const token = localStorage.getItem("token");
@@ -46,7 +46,8 @@ function Dashboard() {
     setShowUpdateTransactionModal(true);
   };
 
-  const closeUpdateTransactionModal = () => setShowUpdateTransactionModal(false);
+  const closeUpdateTransactionModal = () =>
+    setShowUpdateTransactionModal(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -85,7 +86,10 @@ function Dashboard() {
         {showUpdateTransactionModal && (
           <UpdateTransactionModal
             txnId={selectedTransactionId}
-            closeModal={closeUpdateTransactionModal}
+            closeModal={() => {
+              setShowUpdateTransactionModal(false);
+              fetchTransactions(); // refresh list after update
+            }}
           />
         )}
       </div>
