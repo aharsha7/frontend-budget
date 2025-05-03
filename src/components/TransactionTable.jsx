@@ -81,11 +81,13 @@
 // export default TransactionTable;
 import React from "react";
 import api from "../services/ApiUrl";
+import SearchFilter from "../components/SearchFilter";
 
 function TransactionTable({ transactions, setTransactions, onUpdateClick }) {
   const handleUpdate = (id) => {
     onUpdateClick(id); // Open modal with selected transaction
   };
+
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this transaction?")) {
