@@ -10,6 +10,7 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [originalData, setOriginalData] = useState(null);
 
   useEffect(() => {
     const fetchTransaction = async () => {
@@ -17,6 +18,7 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
         setIsLoading(true);
         const res = await api.get(`/transactions/getById/${txnId}`);
         const txn = res.data;
+        setOriginalData(txn); // Store original data for debugging
         setAmount(txn.amount);
         setTxnType(txn.transaction_type);
         setCategory(txn.category);
@@ -47,15 +49,22 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
       return;
     }
 
+    // Create the payload object for API
+    const payload = {
+      amount,
+      transaction_type: txnType,
+      category: finalCategory, // Make sure we're sending the final category
+      description,
+      date,
+    };
+
+    // Log what we're sending for debugging
+    console.log("Updating transaction with payload:", payload);
+
     try {
       setIsLoading(true);
-      await api.put(`/transactions/put/${txnId}`, {
-        amount,
-        transaction_type: txnType,
-        category: finalCategory,
-        description,
-        date,
-      });
+      const response = await api.put(`/transactions/put/${txnId}`, payload);
+      console.log("Update response:", response.data);
       
       // Call the success callback if provided
       if (onUpdateSuccess) {
@@ -133,37 +142,40 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
               </select>
             </div>
 
-            {/* Category Dropdown + New */}
+            {/* Category Selection */}
             <div className="mb-4">
               <label className="block text-gray-700 mb-1">Category</label>
-              <select
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  // Clear new category input when selecting from dropdown
-                  if (e.target.value) {
-                    setNewCategory("");
-                  }
-                }}
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a Category</option>
-                <option value="Food">Food</option>
-                <option value="Travel">Travel</option>
-                <option value="General">General</option>
-                <option value="Shopping">Shopping</option>
-                {categories &&
-                  categories.map((cat) => (
-                    <option key={cat.id || cat.name} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-              </select>
+              <div className="mb-2">
+                <select
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    // Clear new category input when selecting from dropdown
+                    if (e.target.value) {
+                      setNewCategory("");
+                    }
+                  }}
+                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a Category</option>
+                  <option value="Food">Food</option>
+                  <option value="Travel">Travel</option>
+                  <option value="General">General</option>
+                  <option value="Shopping">Shopping</option>
+                  {categories &&
+                    categories.map((cat) => (
+                      <option key={cat.id || cat.name} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
 
-              <div className="mt-2 flex items-center">
+              <div className="mt-2">
+                <label className="block text-gray-700 mb-1">Or Create New Category</label>
                 <input
                   type="text"
-                  placeholder="Or type a new category"
+                  placeholder="Type a new category"
                   className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={newCategory}
                   onChange={(e) => {
@@ -174,9 +186,6 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
                     }
                   }}
                 />
-              </div>
-              <div className="text-sm text-gray-500 mt-1">
-                {newCategory ? "Using custom category" : "Using selected category"}
               </div>
             </div>
 

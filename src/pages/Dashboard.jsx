@@ -62,6 +62,18 @@ function Dashboard() {
     setFilteredTransactions(filteredBySearch); // Update filtered transactions
   };
 
+  // This function updates both transactions and filtered transactions
+  // when a transaction is deleted
+  const handleTransactionsUpdate = (updatedTransactions) => {
+    setTransactions(updatedTransactions);
+    filterTransactions(
+      updatedTransactions,
+      selectedMonth,
+      selectedYear,
+      searchQuery
+    );
+  };
+
   const handleMonthChange = (e) => {
     const [year, month] = e.target.value.split("-");
     const intYear = parseInt(year);
@@ -74,54 +86,64 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-6">
-        <BudgetCards transactions={filteredTransactions} />
-
+        <BudgetCards
+          transactions={transactions.filter((txn) => {
+            if (!txn.date) return false;
+            const txnDateParts = txn.date.split("-");
+            const txnYear = parseInt(txnDateParts[0]);
+            const txnMonth = parseInt(txnDateParts[1]);
+            return txnYear === selectedYear && txnMonth === selectedMonth;
+          })}
+        />
         <div className="flex justify-between items-center mt-10 mb-2">
-  {/* Search Bar */}
-  <div className="flex items-center">
-  <input
-    type="text"
-    placeholder="Search category or amount..."
-    value={searchQuery}
-    onChange={(e) => {
-      const newSearchQuery = e.target.value;
-      setSearchQuery(newSearchQuery);
-      filterTransactions(
-        transactions,
-        selectedMonth,
-        selectedYear,
-        newSearchQuery
-      ); // Update filtered transactions as search query changes
-    }}
-    className="w-60 p-3 border rounded mb-4"
-  />
+          {/* Search Bar */}
+          <div className="flex items-center">
+            <input
+              type="text"
+              placeholder="Search category or amount..."
+              value={searchQuery}
+              onChange={(e) => {
+                const newSearchQuery = e.target.value;
+                setSearchQuery(newSearchQuery);
+                filterTransactions(
+                  transactions,
+                  selectedMonth,
+                  selectedYear,
+                  newSearchQuery
+                ); // Update filtered transactions as search query changes
+              }}
+              className="w-60 p-3 border rounded mb-4"
+            />
 
-  {/* Month Picker */}
-  <div className="ml-10 mb-4">
-    <input
-      type="month"
-      value={`${selectedYear}-${String(selectedMonth).padStart(2, "0")}`}
-      onChange={handleMonthChange}
-      className="border rounded p-3"
-    />
-  </div>
-  </div>
-  {/* Add Budget Button */}
-  <div className="flex items-center ml-6 mb-4">
-    <button
-      onClick={() => setShowAddBudgetModal(true)}
-      className="bg-green-500 text-white px-4 py-2 rounded"
-    >
-      Add Budget
-    </button>
-  </div>
-</div>
-
+            {/* Month Picker */}
+            <div className="ml-10 mb-4">
+              <input
+                type="month"
+                value={`${selectedYear}-${String(selectedMonth).padStart(
+                  2,
+                  "0"
+                )}`}
+                onChange={handleMonthChange}
+                className="border rounded p-3"
+              />
+            </div>
+          </div>
+          {/* Add Budget Button */}
+          <div className="flex items-center ml-6 mb-4">
+            <button
+              onClick={() => setShowAddBudgetModal(true)}
+              className="bg-green-500 text-white px-4 py-2 rounded"
+            >
+              Add Budget
+            </button>
+          </div>
+        </div>
         {/* Render filtered transactions in the transaction table */}
         {filteredTransactions.length > 0 ? (
           <TransactionTable
             transactions={filteredTransactions} // Ensure only filtered transactions are passed here
-            setTransactions={setTransactions}
+            setTransactions={handleTransactionsUpdate} // Use the new handler function
+            refreshTransactions={fetchTransactions} // Pass down refresh function
             onUpdateClick={(id) => {
               setSelectedTransactionId(id);
               setShowUpdateTransactionModal(true);
@@ -130,9 +152,7 @@ function Dashboard() {
         ) : (
           <p className="text-center text-lg">No results found.</p> // If no data matches the search
         )}
-
         <TransactionCharts transactions={filteredTransactions} />
-
         {/* Modals */}
         {showAddBudgetModal && (
           <AddBudgetModal
@@ -140,20 +160,17 @@ function Dashboard() {
             onBudgetAdded={fetchTransactions}
           />
         )}
-
         {showAddCategoryModal && (
           <AddCategoryModal closeModal={() => setShowAddCategoryModal(false)} />
         )}
-
         {showUpdateTransactionModal && (
           <UpdateTransactionModal
             txnId={selectedTransactionId}
-            closeModal={() => {
-              setShowUpdateTransactionModal(false);
-              fetchTransactions();
-            }}
+            closeModal={() => setShowUpdateTransactionModal(false)}
+            onUpdateSuccess={fetchTransactions} // Refresh transactions after update
           />
         )}
+       
       </div>
     </div>
   );

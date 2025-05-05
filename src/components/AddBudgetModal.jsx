@@ -40,18 +40,18 @@ function BudgetModal({ closeModal, onBudgetAdded, onBudgetUpdated, editData = nu
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const selectedCategory = budgetForm.category?.trim();
     const typedCategory = budgetForm.newCategory?.trim();
-
+  
     if (!selectedCategory && !typedCategory) {
       setShowCategoryError(true);
       return;
     }
     setShowCategoryError(false);
-
+  
     const finalCategory = typedCategory || selectedCategory;
-
+  
     const budgetData = {
       amount: parseFloat(budgetForm.amount),
       transaction_type: budgetForm.transaction_type,
@@ -59,22 +59,30 @@ function BudgetModal({ closeModal, onBudgetAdded, onBudgetUpdated, editData = nu
       description: budgetForm.description,
       date: budgetForm.date,
     };
-
+    console.log('Sending data:', budgetData); // Debugging line
+  
+    const config = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`, 
+        "Content-Type": "application/json",
+      }
+    };
+  
     try {
       if (isEditMode) {
-        // Update transaction
-        await api.put(`/transactions/update/${editData.id}`, budgetData);
+        await api.put(`/transactions/update/${editData.id}`, budgetData, config);
         onBudgetUpdated && onBudgetUpdated();
       } else {
-        // Add transaction
-        await api.post("/transactions/post", budgetData);
+        await api.post("/transactions/post", budgetData, config);
         onBudgetAdded && onBudgetAdded();
       }
       closeModal();
+  
     } catch (error) {
       console.error("Failed to submit budget:", error);
     }
   };
+  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
