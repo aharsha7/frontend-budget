@@ -11,13 +11,12 @@ const SearchFilter = ({ data }) => {
 
   return (
     <div className="p-4 max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">Search by Category or Amount</h2>
       <input
         type="text"
         placeholder="Search category or amount..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full p-2 border rounded mb-4 font-bold"
+        className="w-full p-2 border rounded mb-4 font-black"
       />
 
       <table className="w-full border border-collapse">

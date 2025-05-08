@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pie, Bar, Line } from "react-chartjs-2";
-import api from "../services/ApiUrl";
-import {
+import { 
   Chart as ChartJS,
   ArcElement,
   CategoryScale,
@@ -12,14 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  subDays,
-  startOfWeek,
-} from "date-fns";
-import axios from "axios";
+import { format, startOfWeek } from "date-fns";
 
 ChartJS.register(
   ArcElement,
@@ -32,38 +24,10 @@ ChartJS.register(
   Legend
 );
 
-function TransactionCharts() {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function TransactionCharts({ transactions }) {
   const [view, setView] = useState("daily");
-  const [showCharts, setShowCharts] = useState(false);
 
-  // Fetch function
-  const fetchTransactions = async () => {
-    try {
-
-      const accessToken = localStorage.getItem("token");
-      const config = {
-        headers: {
-          Authorization:`Bearer ${accessToken}`,
-        }
-      }
-      const res = await axios.get("http://localhost:5000/api/transactions/get", config);
-      setTransactions(res.data);
-      setError(null);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load transactions.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTransactions(); // initial load once
-  }, []); 
-
+  // Process transactions as data changes
   const income = transactions.filter((t) => t.transaction_type === "income");
   const expense = transactions.filter((t) => t.transaction_type === "expense");
 
@@ -214,83 +178,85 @@ function TransactionCharts() {
   };
 
   return (
-    <div>
-        <div>
-          <div className="flex justify-end">
-            <button
-              onClick={() => setShowCharts(!showCharts)}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-900 transition mb-4"
-            >
-              {showCharts ? "Hide Charts" : "Show Charts"}
-            </button>
+    <div className="p-4">
+      <div className="border-2 shadow-2xl rounded-2xl p-6">
+        {/* Chart View Switch Buttons */}
+        <div className="flex justify-center space-x-4 mb-6">
+          <button
+            onClick={() => setView("daily")}
+            className={`px-4 py-2 rounded font-medium transition ${
+              view === "daily"
+                ? "bg-blue-600 text-white"
+                : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+            }`}
+          >
+            Daily
+          </button>
+          <button
+            onClick={() => setView("weekly")}
+            className={`px-4 py-2 rounded font-medium transition ${
+              view === "weekly"
+                ? "bg-blue-600 text-white"
+                : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+            }`}
+          >
+            Weekly
+          </button>
+          <button
+            onClick={() => setView("monthly")}
+            className={`px-4 py-2 rounded font-medium transition ${
+              view === "monthly"
+                ? "bg-blue-600 text-white"
+                : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+            }`}
+          >
+            Monthly
+          </button>
+        </div>
+
+        {/* Charts Section */}
+        <div className="flex flex-col lg:flex-row gap-12 items-center">
+          {/* Line/Bar Chart */}
+          <div className="bg-white shadow-lg rounded-xl p-4 w-full lg:w-[900px] h-[500px]">
+            {view === "daily" && (
+              <>
+                <h4 className="text-center font-semibold mb-2 text-blue-700">Daily Flow</h4>
+                <Line data={getChartData()} />
+              </>
+            )}
+            {view === "weekly" && (
+              <>
+                <h4 className="text-center font-semibold mb-2 text-blue-700">Weekly Flow</h4>
+                <Line data={getChartData()} />
+              </>
+            )}
+            {view === "monthly" && (
+              <>
+                <h4 className="text-center font-semibold mb-2 text-blue-700">Monthly Trend</h4>
+                <Bar data={getChartData()} />
+              </>
+            )}
           </div>
 
-          {showCharts && (
-            <div>
-              <div className="flex justify-center space-x-4 mb-4">
-                <button
-                  onClick={() => setView("daily")}
-                  className="hover:underline btn btn-primary"
-                >
-                  Daily
-                </button>
-                <button
-                  onClick={() => setView("weekly")}
-                  className="hover:underline btn btn-primary"
-                >
-                  Weekly
-                </button>
-                <button
-                  onClick={() => setView("monthly")}
-                  className="hover:underline btn btn-primary"
-                >
-                  Monthly
-                </button>
-              </div>
-
-              <div className="flex flex-row gap-8">
-                <div style={{ width: "900px", height: "500px" }}>
-                  {view === "daily" && (
-                    <>
-                      <h4 className="text-center font-medium">Daily Flow</h4>
-                      <Line data={getChartData()} />
-                    </>
-                  )}
-                  {view === "weekly" && (
-                    <>
-                      <h4 className="text-center font-medium">Weekly Flow</h4>
-                      <Line data={getChartData()} />
-                    </>
-                  )}
-                  {view === "monthly" && (
-                    <>
-                      <h4 className="text-center font-medium">Monthly Trend</h4>
-                      <Bar data={getChartData()} />
-                    </>
-                  )}
-                </div>
-
-                <div className="ml-12" style={{ width: "400px", height: "400px" }}>
-                  <h4 className="text-center font-medium">Income vs Expense</h4>
-                  <Pie
-                    data={pieData}
-                    options={{
-                      maintainAspectRatio: false,
-                      responsive: true,
-                      plugins: {
-                        legend: {
-                          position: "top",
-                        },
-                      },
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Pie Chart */}
+          <div className="bg-white shadow-lg rounded-xl p-4 w-full lg:w-[400px] h-[500px]">
+            <h4 className="text-center font-semibold mb-2 text-blue-700">Income vs Expense</h4>
+            <Pie
+              data={pieData}
+              options={{
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: "top",
+                  },
+                },
+              }}
+            />
+          </div>
         </div>
+      </div>
     </div>
   );
 }
-
 export default TransactionCharts;

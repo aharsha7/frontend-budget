@@ -101,7 +101,8 @@ function BudgetModal({ closeModal, onBudgetAdded, onBudgetUpdated, editData = nu
             onClick={closeModal}
             className="absolute right-0 top-0 text-gray-500 hover:text-gray-700"
           >
-            &times;
+            <i class="fa-solid fa-delete-left"></i>
+
           </button>
         </h2>
 
@@ -196,14 +197,8 @@ function BudgetModal({ closeModal, onBudgetAdded, onBudgetUpdated, editData = nu
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-between">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="bg-gray-500 text-white px-4 py-2 rounded"
-            >
-              Cancel
-            </button>
+          <div className="flex justify-center">
+            
             <button
               type="submit"
               className="bg-green-500 text-white px-4 py-2 rounded"

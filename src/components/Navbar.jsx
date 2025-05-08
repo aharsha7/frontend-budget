@@ -1,21 +1,22 @@
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { User } from "lucide-react";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = () => {
-    setIsDropdownOpen(false); 
-    logout(); 
-    navigate("/"); 
+    setIsDropdownOpen(false);
+    logout();
+    navigate("/");
   };
 
   return (
     <div className="bg-blue-900 text-white flex justify-between items-center p-4">
-      <h1 className="text-xl font-bold">Budget App</h1>
+      <h1 className="text-xl font-bold">Budget Tracker</h1>
 
       {user && (
         <div className="relative">
@@ -24,6 +25,7 @@ const Navbar = () => {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle dropdown visibility
             className="flex items-center gap-2 focus:outline-none"
           >
+            <User size={20} />
             <span>{user.name}</span>
             <svg
               className="w-4 h-4"

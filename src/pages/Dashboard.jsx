@@ -8,6 +8,7 @@ import api from "../services/ApiUrl";
 import TransactionTable from "../components/TransactionTable";
 import TransactionCharts from "../components/TransactionCharts";
 import axios from "axios";
+import { Plus, BarChart3, List } from 'lucide-react';
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -15,8 +16,14 @@ function Dashboard() {
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [showAddBudgetModal, setShowAddBudgetModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
-  const [showUpdateTransactionModal, setShowUpdateTransactionModal] = useState(false);
+  const [showUpdateTransactionModal, setShowUpdateTransactionModal] =
+    useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+  const [showCharts, setShowCharts] = useState(false);
+
+  const toggleCharts = () => {
+    setShowCharts(!showCharts); 
+  };
 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
@@ -35,20 +42,26 @@ function Dashboard() {
 
   const fetchTransactions = async () => {
     try {
-
       const accessToken = localStorage.getItem("token");
       const config = {
         headers: {
-          Authorization:`Bearer ${accessToken}`,
-        }
-      }
-      const res = await axios.get("http://localhost:5000/api/transactions/get", config);
+          Authorization: `Bearer ${accessToken}`,
+        },
+      };
+      const res = await axios.get(
+        "http://localhost:5000/api/transactions/get",
+        config
+      );
       // console.log(res)
       const reversedData = [...res.data].reverse();
       // console.log(reversedData)
       setTransactions(reversedData);
-      filterTransactions(reversedData, selectedMonth, selectedYear, searchQuery);
-      
+      filterTransactions(
+        reversedData,
+        selectedMonth,
+        selectedYear,
+        searchQuery
+      );
     } catch (err) {
       console.error("Failed to fetch transactions:", err);
     }
@@ -86,7 +99,10 @@ function Dashboard() {
   };
 
   const handleBudgetAdded = (newTransaction) => {
-    setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]); 
+    setTransactions((prevTransactions) => [
+      newTransaction,
+      ...prevTransactions,
+    ]);
   };
 
   const handleMonthChange = (e) => {
@@ -101,6 +117,7 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-6">
+        {/* Budget Cards */}
         <BudgetCards
           transactions={transactions.filter((txn) => {
             if (!txn.date) return false;
@@ -110,72 +127,111 @@ function Dashboard() {
             return txnYear === selectedYear && txnMonth === selectedMonth;
           })}
         />
-        <div className="flex justify-between items-center mt-10 mb-2">
-          {/* Search Bar */}
-          <div className="flex items-center">
-            <input
-              type="text"
-              placeholder="Search category or amount..."
-              value={searchQuery}
-              onChange={(e) => {
-                const newSearchQuery = e.target.value;
-                setSearchQuery(newSearchQuery);
-                filterTransactions(
-                  transactions,
-                  selectedMonth,
-                  selectedYear,
-                  newSearchQuery
-                ); // Update filtered transactions as search query changes
-              }}
-              className="w-60 p-3 border rounded mb-4"
-            />
-
-            {/* Month Picker */}
-            <div className="ml-10 mb-4">
-              <input
-                type="month"
-                value={`${selectedYear}-${String(selectedMonth).padStart(
-                  2,
-                  "0"
-                )}`}
-                onChange={handleMonthChange}
-                className="border rounded p-3"
-              />
+  
+        {/* Conditionally Render Content */}
+        {showCharts ? (
+          // Show only charts
+          <>
+            <div className="flex justify-end mt-4 mb-4">
+              <button
+                onClick={toggleCharts}
+                className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+              >
+                <List size={24} />
+                Show Transactions
+              </button>
             </div>
-          </div>
-         
-
-          {/* Add Budget Button */}
-          <div className="flex items-center ml-6 mb-4">
-            <button
-              onClick={() => setShowAddBudgetModal(true)}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Add Budget
-            </button>
-          </div>
-        </div>
-
-        <TransactionCharts
-            transactions={filteredTransactions}
-            refreshTransactions={fetchTransactions}
-          />
-
-        {/* Render filtered transactions in the transaction table */}
-        {filteredTransactions.length > 0 ? (
-          <TransactionTable
-            transactions={filteredTransactions} 
-            setTransactions={handleTransactionsUpdate} 
-            refreshTransactions={fetchTransactions} 
-            onUpdateClick={(id) => {
-              setSelectedTransactionId(id);
-              setShowUpdateTransactionModal(true);
-            }}
-          />
+            <TransactionCharts
+              transactions={filteredTransactions}
+              refreshTransactions={fetchTransactions}
+            />
+          </>
         ) : (
-          <p className="text-center text-lg">No results found.</p> // If no data matches the search
+          <>
+            {/* Search Bar, Month Picker, and Buttons Section */}
+            <div className="flex flex-wrap justify-between items-center gap-4 mt-10 mb-2">
+              {/* Search Bar and Month Picker */}
+              <div className="flex flex-wrap items-center gap-4">
+                {/* Search Bar */}
+                <input
+                  type="text"
+                  placeholder="Search category or amount..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    const newSearchQuery = e.target.value;
+                    setSearchQuery(newSearchQuery);
+                    filterTransactions(
+                      transactions,
+                      selectedMonth,
+                      selectedYear,
+                      newSearchQuery
+                    );
+                  }}
+                  className="w-full sm:w-60 p-3 border rounded"
+                />
+  
+                {/* Month Picker */}
+                <div className="w-full sm:w-auto">
+                  <input
+                    type="month"
+                    value={`${selectedYear}-${String(selectedMonth).padStart(
+                      2,
+                      "0"
+                    )}`}
+                    onChange={handleMonthChange}
+                    className="w-full sm:w-auto border rounded p-3"
+                  />
+                </div>
+              </div>
+  
+              {/* Buttons Section */}
+              <div className="flex items-center space-x-4">
+                {/* Add Budget Button */}
+                <button
+                  onClick={() => setShowAddBudgetModal(true)}
+                  className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+                >
+                  <Plus size={18} />
+                  Add Budget
+                </button>
+  
+                {/* Show Charts Button */}
+                <button
+                  onClick={toggleCharts}
+                  className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                >
+                  {showCharts ? (
+                    <>
+                      <List size={18} />
+                      Show Transactions
+                    </>
+                  ) : (
+                    <>
+                      <BarChart3 size={18} />
+                      Show Charts
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+  
+            {/* Transaction Table */}
+            {filteredTransactions.length > 0 ? (
+              <TransactionTable
+                transactions={filteredTransactions}
+                setTransactions={handleTransactionsUpdate}
+                refreshTransactions={fetchTransactions}
+                onUpdateClick={(id) => {
+                  setSelectedTransactionId(id);
+                  setShowUpdateTransactionModal(true);
+                }}
+              />
+            ) : (
+              <p className="text-center text-lg">No results found.</p>
+            )}
+          </>
         )}
-
+  
         {/* Modals */}
         {showAddBudgetModal && (
           <AddBudgetModal
@@ -190,7 +246,7 @@ function Dashboard() {
           <UpdateTransactionModal
             txnId={selectedTransactionId}
             closeModal={() => setShowUpdateTransactionModal(false)}
-            onUpdateSuccess={fetchTransactions} // Refresh transactions after update
+            onUpdateSuccess={fetchTransactions}
           />
         )}
       </div>

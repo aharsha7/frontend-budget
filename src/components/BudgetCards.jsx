@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Coins, ShoppingCart, PiggyBank } from "lucide-react";
 
 function BudgetCards({ transactions }) {
   const [totalIncome, setTotalIncome] = useState(0);
@@ -9,7 +10,6 @@ function BudgetCards({ transactions }) {
     let income = 0;
     let expense = 0;
 
-    // No filtering here: transactions are already filtered from Dashboard
     transactions.forEach((txn) => {
       if (txn.transaction_type === "income" || txn.type === "income") {
         income += txn.amount;
@@ -23,27 +23,43 @@ function BudgetCards({ transactions }) {
     setRemainingAmount(income - expense);
   }, [transactions]);
 
-  return (
-    <div>
-      {/* Cards */}
-      <div className="flex flex-wrap justify-around gap-4 mt-4">
+  const renderValueWithArrow = (value) => {
+    const isPositive = value >= 0;
+    return (
+      <span className={`flex items-center gap-1 ${isPositive ? "text-green-600" : "text-red-600"}`}>
+        {isPositive ? "↑" : "↓"} Rs.{Math.abs(value).toFixed(2)}
+      </span>
+    );
+  };
 
+  return (
+    <div className="w-full">
+      <div className="flex flex-wrap justify-between gap-4 mt-4 w-full">
         {/* Income */}
-        <div className="bg-green-500 text-white p-2 w-40 gap-1 rounded-lg shadow-md flex flex-col items-center">
+        <div className="flex-1 min-w-[150px] p-4 rounded-lg shadow-md flex flex-col items-center">
+          <Coins className="text-green-500 w-8 h-8 mb-2" />
           <h3 className="text-md font-semibold">Income</h3>
-          <p className="text-md">Rs.{totalIncome.toFixed(2)}</p>
+          <p className="text-md">
+            {renderValueWithArrow(totalIncome)}
+          </p>
         </div>
 
         {/* Expense */}
-        <div className="bg-red-500 text-white p-2 w-40 gap-1 rounded-lg shadow-md flex flex-col items-center">
+        <div className="flex-1 min-w-[150px] p-4 rounded-lg shadow-md flex flex-col items-center">
+          <ShoppingCart className="text-red-500 w-8 h-8 mb-2" />
           <h3 className="text-md font-semibold">Expense</h3>
-          <p className="text-md">Rs.{totalExpense.toFixed(2)}</p>
+          <p className="text-md">
+            {renderValueWithArrow(-totalExpense)}
+          </p>
         </div>
 
         {/* Remaining */}
-        <div className="bg-blue-600 text-white p-2 w-40 rounded-lg shadow-md flex flex-col items-center">
+        <div className="flex-1 min-w-[150px] p-4 rounded-lg shadow-md flex flex-col items-center">
+          <PiggyBank className="text-yellow-500 w-8 h-8 mb-2" />
           <h3 className="text-md font-semibold">Remaining</h3>
-          <p className="text-md">Rs.{remainingAmount.toFixed(2)}</p>
+          <p className="text-md">
+            {renderValueWithArrow(remainingAmount)}
+          </p>
         </div>
       </div>
     </div>

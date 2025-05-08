@@ -1,6 +1,6 @@
-import { useState } from "react"; 
-import { useNavigate } from "react-router-dom"; 
-import { FaEye, FaEyeSlash } from "react-icons/fa"; 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import api from "../services/ApiUrl";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
@@ -17,8 +17,8 @@ function Signup() {
   const navigate = useNavigate();
 
   const notyf = new Notyf({
-    position: { x: "center", y: "top" }, 
-    duration: 4000, 
+    position: { x: "right", y: "top" },
+    duration: 4000,
   });
 
   const handleChange = (e) => {
@@ -54,9 +54,9 @@ function Signup() {
         name,
         email,
         password,
-        confirm_password: password,  
+        confirm_password: password,
       });
-      
+
       console.log("Signup response:", res.data);
 
       if (!res.data || !res.data.token || !res.data.user) {
@@ -74,12 +74,14 @@ function Signup() {
     } catch (error) {
       console.error("Signup error:", error);
 
-      const msg = error.response?.data?.message || error.response?.data?.error || error.message;
+      const msg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message;
 
       if (msg === "Email already registered") {
         setErrors({ email: "Email already registered." });
         notyf.error("Email already registered. Please try again.");
-
       } else {
         setErrors({ general: msg || "Signup failed. Please try again." });
         notyf.error(msg || "Signup failed. Please try again.");
@@ -88,105 +90,143 @@ function Signup() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form
-        onSubmit={handleSignup}
-        className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm bg-opacity-50"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
-
-        <div className="mb-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            className="w-full px-4 py-2 border rounded"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-          {errors.name && (
-            <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="w-full px-4 py-2 border rounded"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-          )}
-        </div>
-
-        <div className="mb-4 relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder="Password"
-            className="w-full px-4 py-2 border rounded pr-10"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-          <div
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </div>
-          {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-          )}
-        </div>
-
-        <div className="mb-6 relative">
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            className="w-full px-4 py-2 border rounded pr-10"
-            value={form.confirmPassword}
-            onChange={handleChange}
-            required
-          />
-
-          {errors.confirmPassword && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.confirmPassword}
-            </p>
-          )}
-        </div>
-
-        {errors.general && (
-          <p className="text-red-500 text-sm mb-4 text-center">
-            {errors.general}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+    <div className="fixed inset-0 flex justify-center items-center bg-gradient-to-br from-blue-800 to-green-700 overflow-hidden" 
+      style={{
+        backgroundImage: "url('/images/budget-bg.jpg')"
+      }}
+    >
+      <div className="w-full max-w-md px-4">
+        <form
+          onSubmit={handleSignup}
+          className="bg-white bg-opacity-85 mt-10 p-8 rounded-xl shadow-xl backdrop-blur-sm"
         >
-          Create Account
-        </button>
+          {/* Budget Icon Header */}
+          <div className="flex justify-center mb-2 ">
+            <div className="">
+              <img
+                src="/budget_signup.jpeg"
+                alt="Login Logo"
+                className="h-32 w-18 rounded-full"
+              />
+            </div>
+          </div>
 
-        <p className="mt-4 text-sm text-center">
-          Already have an account?{" "}
-          <span
-            className="text-blue-600 cursor-pointer"
-            onClick={() => navigate("/")}
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+            Create New Account
+          </h2>
+
+          <div className="mb-4">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa-solid fa-circle-user"></i>
+              </div>
+              <input
+                type="text"
+                name="name"
+                placeholder="Name"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa-solid fa-envelope"></i>
+              </div>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+          </div>
+
+          <div className="mb-4 relative">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa-solid fa-unlock-keyhole"></i>
+              </div>
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+              <div
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </div>
+            </div>
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
+          </div>
+
+          <div className="mb-4 relative">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.confirmPassword}
+              </p>
+            )}
+          </div>
+
+          {errors.general && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded mb-4">
+              <p className="text-red-500 text-sm">{errors.general}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 rounded-lg hover:from-green-700 hover:to-green-800"
           >
-            Login
-          </span>
-        </p>
-      </form>
+            Create Account
+          </button>
+
+          <p className="mt-4 text-center text-gray-700">
+            Already have an account?{" "}
+            <span
+              className="text-green-600 cursor-pointer hover:text-green-700 font-medium underline"
+              onClick={() => navigate("/")}
+            >
+              Login
+            </span>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

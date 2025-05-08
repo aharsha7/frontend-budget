@@ -96,15 +96,15 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-md w-full max-w-md">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
+      <div className="bg-white p-6 rounded-xl shadow-md w-96">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Update Transaction</h2>
           <button
             onClick={closeModal}
             className="text-gray-500 hover:text-gray-700"
           >
-            &times;
+            <i class="fa-solid fa-delete-left"></i>
           </button>
         </div>
 
@@ -215,17 +215,11 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end space-x-2 pt-2">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded transition-colors"
-            >
-              Cancel
-            </button>
+          <div className="flex justify-center">
+            
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+              className="px-4 py-2 bg-blue-600 hover:bg-orange-400 text-white rounded transition-colors"
             >
               Update
             </button>

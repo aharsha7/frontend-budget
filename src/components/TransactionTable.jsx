@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import api from "../services/ApiUrl";
-import ConfirmModal from "./ConfirmModal"; // Import the ConfirmModal component
+import ConfirmModal from "./ConfirmModal"; 
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 
@@ -50,69 +50,73 @@ function TransactionTable({ transactions, setTransactions, onUpdateClick, refres
   };
   
   const openConfirmModal = (id) => {
-    setTransactionToDelete(id); // Set the transaction to delete
-    setShowConfirmModal(true); // Show the confirmation modal
+    setTransactionToDelete(id); 
+    setShowConfirmModal(true); 
   };
 
   const closeConfirmModal = () => {
-    setShowConfirmModal(false); // Hide the confirmation modal
-    setTransactionToDelete(null); // Reset the transaction to delete
+    setShowConfirmModal(false); 
+    setTransactionToDelete(null); 
   };
 
   return (
-    <div className="bg-white p-4 rounded shadow border-2">
-      <h2 className="text-xl font-semibold mb-4">Transaction History</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse table-fixed">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 border w-40">Date</th>
-              <th className="p-2 border">Amount</th>
-              <th className="p-2 border">Type</th>
-              <th className="p-2 border">Category</th>
-              <th className="p-2 border">Description</th>
-              <th className="p-2 border">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((txn) => (
-              <tr key={txn.id} className="hover:bg-gray-50">
-                <td className="p-2 border">{txn.date}</td>
-                <td className="p-2 border">₹ {txn.amount}</td>
-                <td className="p-2 border">{txn.transaction_type}</td>
-                <td className="p-2 border">{txn.category}</td>
-                <td className="p-2 border">{txn.description || "-"}</td>
-                <td className="p-2 border space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => handleUpdate(txn.id)}
-                    className="bg-teal-600 text-white px-4 py-2 rounded-full hover:bg-sky-400"
-                  >
-                    Update
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openConfirmModal(txn.id)}
-                    className="bg-rose-500 text-white px-4 py-2 rounded-full hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+<div className="bg-white p-4 rounded shadow border-2">
+  <h2 className="text-xl font-semibold mb-4">Transaction History</h2>
+  {/* Add a scrollable container for the table */}
+  <div className="overflow-x-auto">
+    <table className="w-full text-left border-collapse table-fixed">
+      <thead>
+        <tr className="bg-gray-100">
+          <th className="p-2 border w-10">#</th>
+          <th className="p-2 border w-28">Date</th>
+          <th className="p-2 border break-words">Amount</th>
+          <th className="p-2 border break-words">Type</th>
+          <th className="p-2 border break-words">Category</th>
+          <th className="p-2 border break-words">Description</th>
+          <th className="p-2 border text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {transactions.map((txn, index) => (
+          <tr key={txn.id} className="hover:bg-gray-50">
+            <td className="p-2 border">{index + 1}</td>
+            <td className="p-2 border break-words">{txn.date}</td>
+            <td className="p-2 border break-words">₹ {txn.amount}</td>
+            <td className="p-2 border break-words">{txn.transaction_type}</td>
+            <td className="p-2 border break-words">{txn.category}</td>
+            <td className="p-2 border break-words">{txn.description || "-"}</td>
+            <td className="p-2 border">
+              <div className="flex flex-wrap justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleUpdate(txn.id)}
+                  className="bg-teal-600 text-white px-4 py-2 rounded-full hover:bg-sky-400"
+                >
+                  Update
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openConfirmModal(txn.id)}
+                  className="bg-rose-500 text-white px-4 py-2 rounded-full hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 
-
-      {showConfirmModal && (
-        <ConfirmModal
-          message="Are you sure you want to delete this data?"
-          onConfirm={handleDelete}
-          onCancel={closeConfirmModal}
-        />
-      )}
-    </div>
+  {showConfirmModal && (
+    <ConfirmModal
+      message="Are you sure you want to delete this data?"
+      onConfirm={handleDelete}
+      onCancel={closeConfirmModal}
+    />
+  )}
+</div>
   );
 }
 
