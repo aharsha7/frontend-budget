@@ -17,7 +17,7 @@ const SearchFilter = ({ data }) => {
         placeholder="Search category or amount..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full p-2 border rounded mb-4"
+        className="w-full p-2 border rounded mb-4 font-bold"
       />
 
       <table className="w-full border border-collapse">

@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import api from "../services/ApiUrl";
+import axios from "axios";
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("aharsha7@gmail.com");
+  const [password, setPassword] = useState("123456");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setUser } = useAuth();
@@ -13,8 +14,7 @@ function Login() {
     e.preventDefault();
     setError("");
     try {
-      const res = await api.post("/auth/login", { email, password });
-      console.log(api, "url");
+      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
       localStorage.setItem("token", res.data.access_token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user); 
@@ -23,7 +23,6 @@ function Login() {
       setError(err.response?.data?.error || "Login failed");
     }
   };
-
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100 bg-cover bg-center ">
       <form

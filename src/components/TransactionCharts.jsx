@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Pie, Bar, Line } from "react-chartjs-2";
-import api from "../services/ApiUrl"; // Adjust the import path as necessary
+import api from "../services/ApiUrl";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -18,8 +18,8 @@ import {
   endOfMonth,
   subDays,
   startOfWeek,
-  endOfWeek,
-} from "date-fns"; // Import date-fns functions
+} from "date-fns";
+import axios from "axios";
 
 ChartJS.register(
   ArcElement,
@@ -36,28 +36,34 @@ function TransactionCharts() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [view, setView] = useState("daily"); // Default view set to 'daily'
-  const [showCharts, setShowCharts] = useState(false); // State to toggle chart visibility
+  const [view, setView] = useState("daily");
+  const [showCharts, setShowCharts] = useState(false);
+
+  // Fetch function
+  const fetchTransactions = async () => {
+    try {
+
+      const accessToken = localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization:`Bearer ${accessToken}`,
+        }
+      }
+      const res = await axios.get("http://localhost:5000/api/transactions/get", config);
+      setTransactions(res.data);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load transactions.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get("/transactions/get");
-        setTransactions(res.data);
-        setError(null);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load transactions.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchTransactions(); // initial load once
+  }, []); 
 
-    fetchTransactions();
-  }, []);
-
-  // 1. Process Data for Pie Chart (Income vs Expense)
   const income = transactions.filter((t) => t.transaction_type === "income");
   const expense = transactions.filter((t) => t.transaction_type === "expense");
 
@@ -74,11 +80,10 @@ function TransactionCharts() {
     ],
   };
 
-  // 2. Data Processing Functions (Daily, Weekly, Monthly)
   const processDailyData = () => {
     const dailyData = {};
     transactions.forEach((t) => {
-      const date = format(new Date(t.date), "yyyy-MM-dd"); // Use date-fns to format the date
+      const date = format(new Date(t.date), "yyyy-MM-dd");
       if (!dailyData[date]) {
         dailyData[date] = { income: 0, expense: 0 };
       }
@@ -121,7 +126,7 @@ function TransactionCharts() {
   const processMonthlyData = () => {
     const monthlyData = {};
     transactions.forEach((t) => {
-      const date = format(new Date(t.date), "yyyy-MM"); // Group by year and month
+      const date = format(new Date(t.date), "yyyy-MM");
       if (!monthlyData[date]) {
         monthlyData[date] = { income: 0, expense: 0 };
       }
@@ -139,7 +144,6 @@ function TransactionCharts() {
     return { labels, incomeData, expenseData };
   };
 
-  // 3. Generate Chart Data
   const dailyChartData = processDailyData();
   const weeklyChartData = processWeeklyData();
   const monthlyChartData = processMonthlyData();
@@ -178,7 +182,6 @@ function TransactionCharts() {
     ],
   };
 
-  // Weekly Chart Data
   const weeklyLineChartData = {
     labels: weeklyChartData.labels,
     datasets: [
@@ -197,7 +200,6 @@ function TransactionCharts() {
     ],
   };
 
-  // Handling the chart display based on the selected view
   const getChartData = () => {
     switch (view) {
       case "daily":
@@ -212,71 +214,63 @@ function TransactionCharts() {
   };
 
   return (
-    <div className="space-y-8 bg-white p-4 rounded shadow">
-      <h2 className="text-xl font-semibold">Transaction Visuals</h2>
-
-      {loading && <p>Loading transactions...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {!loading && !error && (
+    <div>
         <div>
-          {/* Button to toggle chart visibility */}
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-end">
             <button
               onClick={() => setShowCharts(!showCharts)}
-              className="btn btn-primary"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-900 transition mb-4"
             >
               {showCharts ? "Hide Charts" : "Show Charts"}
             </button>
           </div>
 
-          {/* Show charts only if showCharts is true */}
           {showCharts && (
             <div>
-              {/* Buttons to switch between views */}
               <div className="flex justify-center space-x-4 mb-4">
                 <button
                   onClick={() => setView("daily")}
-                  className="btn btn-primary"
+                  className="hover:underline btn btn-primary"
                 >
                   Daily
                 </button>
                 <button
                   onClick={() => setView("weekly")}
-                  className="btn btn-primary"
+                  className="hover:underline btn btn-primary"
                 >
                   Weekly
                 </button>
                 <button
                   onClick={() => setView("monthly")}
-                  className="btn btn-primary"
+                  className="hover:underline btn btn-primary"
                 >
                   Monthly
                 </button>
               </div>
 
-              {/* Display selected chart */}
-              {view === "daily" && (
-                <div>
-                  <h4 className="text-center font-medium">Daily Flow</h4>
-                  <Line data={getChartData()} />
+              <div className="flex flex-row gap-8">
+                <div style={{ width: "900px", height: "500px" }}>
+                  {view === "daily" && (
+                    <>
+                      <h4 className="text-center font-medium">Daily Flow</h4>
+                      <Line data={getChartData()} />
+                    </>
+                  )}
+                  {view === "weekly" && (
+                    <>
+                      <h4 className="text-center font-medium">Weekly Flow</h4>
+                      <Line data={getChartData()} />
+                    </>
+                  )}
+                  {view === "monthly" && (
+                    <>
+                      <h4 className="text-center font-medium">Monthly Trend</h4>
+                      <Bar data={getChartData()} />
+                    </>
+                  )}
                 </div>
-              )}
-              {view === "weekly" && (
-                <div>
-                  <h4 className="text-center font-medium">Weekly Flow</h4>
-                  <Line data={getChartData()} />
-                </div>
-              )}
-              {view === "monthly" && (
-                <div>
-                  <h4 className="text-center font-medium">Monthly Trend</h4>
-                  <Bar data={getChartData()} />
-                </div>
-              )}
 
-              <div className="mt-8 flex justify-center">
-                <div style={{ width: "400px", height: "400px" }}>
+                <div className="ml-12" style={{ width: "400px", height: "400px" }}>
                   <h4 className="text-center font-medium">Income vs Expense</h4>
                   <Pie
                     data={pieData}
@@ -295,7 +289,6 @@ function TransactionCharts() {
             </div>
           )}
         </div>
-      )}
     </div>
   );
 }

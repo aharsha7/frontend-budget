@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/ApiUrl";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
 
 function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess }) {
   const [amount, setAmount] = useState("");
@@ -9,16 +11,33 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [originalData, setOriginalData] = useState(null);
+
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "right", y: "top" },
+    types: [
+      {
+        type: "success",
+        background: "orange",
+        icon: false,
+      },
+      {
+        type: "error",
+        background: "red",
+        icon: false,
+      },
+    ],
+  });
 
   useEffect(() => {
     const fetchTransaction = async () => {
       try {
-        setIsLoading(true);
-        const res = await api.get(`/transactions/getById/${txnId}`);
+        const res = await api.get(`/transactions/getById/${txnId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         const txn = res.data;
-        setOriginalData(txn); // Store original data for debugging
         setAmount(txn.amount);
         setTxnType(txn.transaction_type);
         setCategory(txn.category);
@@ -27,11 +46,9 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
       } catch (err) {
         console.error("Error fetching transaction:", err);
         setError("Failed to load transaction details");
-      } finally {
-        setIsLoading(false);
       }
     };
-    
+
     if (txnId) {
       fetchTransaction();
     }
@@ -40,43 +57,41 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
-    // Determine which category to use (new or existing)
+
     const finalCategory = newCategory.trim() !== "" ? newCategory : category;
-    
+
     if (!finalCategory) {
       setError("Please select or enter a category");
       return;
     }
 
-    // Create the payload object for API
     const payload = {
       amount,
       transaction_type: txnType,
-      category: finalCategory, // Make sure we're sending the final category
+      category: finalCategory,
       description,
       date,
     };
 
-    // Log what we're sending for debugging
     console.log("Updating transaction with payload:", payload);
 
     try {
-      setIsLoading(true);
-      const response = await api.put(`/transactions/put/${txnId}`, payload);
+      const response = await api.put(`/transactions/put/${txnId}`, payload, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       console.log("Update response:", response.data);
-      
-      // Call the success callback if provided
+
       if (onUpdateSuccess) {
         onUpdateSuccess();
       }
-      
+      notyf.success("Budget updated successfully!");
       closeModal();
     } catch (err) {
       console.error("Error updating transaction:", err);
       setError(err.response?.data?.message || "Failed to update transaction");
-    } finally {
-      setIsLoading(false);
+      notyf.error("Failed to update budget.");
     }
   };
 
@@ -85,140 +100,137 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
       <div className="bg-white p-6 rounded-md w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Update Transaction</h2>
-          <button 
+          <button
             onClick={closeModal}
             className="text-gray-500 hover:text-gray-700"
           >
             &times;
           </button>
         </div>
-        
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
-        
-        {isLoading ? (
-          <div className="text-center py-4">Loading...</div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Date */}
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-1">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
 
-            {/* Amount */}
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-1">Amount</label>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Date */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-            {/* Transaction Type */}
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-1">Transaction Type</label>
+          {/* Amount */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">Amount</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Transaction Type */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">Transaction Type</label>
+            <select
+              value={txnType}
+              onChange={(e) => setTxnType(e.target.value)}
+              required
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Type</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+
+          {/* Category Selection */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">Category</label>
+            <div className="mb-2">
               <select
-                value={txnType}
-                onChange={(e) => setTxnType(e.target.value)}
-                required
+                value={category}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  if (e.target.value) {
+                    setNewCategory("");
+                  }
+                }}
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select Type</option>
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
+                <option value="">Select a Category</option>
+                <option value="Food">Food</option>
+                <option value="Travel">Travel</option>
+                <option value="General">General</option>
+                <option value="Shopping">Shopping</option>
+                {categories &&
+                  categories.map((cat) => (
+                    <option key={cat.id || cat.name} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
               </select>
             </div>
 
-            {/* Category Selection */}
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-1">Category</label>
-              <div className="mb-2">
-                <select
-                  value={category}
-                  onChange={(e) => {
-                    setCategory(e.target.value);
-                    // Clear new category input when selecting from dropdown
-                    if (e.target.value) {
-                      setNewCategory("");
-                    }
-                  }}
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select a Category</option>
-                  <option value="Food">Food</option>
-                  <option value="Travel">Travel</option>
-                  <option value="General">General</option>
-                  <option value="Shopping">Shopping</option>
-                  {categories &&
-                    categories.map((cat) => (
-                      <option key={cat.id || cat.name} value={cat.name}>
-                        {cat.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <div className="mt-2">
-                <label className="block text-gray-700 mb-1">Or Create New Category</label>
-                <input
-                  type="text"
-                  placeholder="Type a new category"
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={newCategory}
-                  onChange={(e) => {
-                    setNewCategory(e.target.value);
-                    // Clear dropdown selection when typing a new category
-                    if (e.target.value.trim() !== "") {
-                      setCategory("");
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-1">Description (Optional)</label>
+            <div className="mt-2">
+              <label className="block text-gray-700 mb-1">
+                Or Create New Category
+              </label>
               <input
                 type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Type a new category"
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newCategory}
+                onChange={(e) => {
+                  setNewCategory(e.target.value);
+                  if (e.target.value.trim() !== "") {
+                    setCategory("");
+                  }
+                }}
               />
             </div>
+          </div>
 
-            {/* Buttons */}
-            <div className="flex justify-end space-x-2 pt-2">
-              <button
-                type="button"
-                onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-              >
-                {isLoading ? "Updating..." : "Update"}
-              </button>
-            </div>
-          </form>
-        )}
+          {/* Description */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">
+              Description (Optional)
+            </label>
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end space-x-2 pt-2">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+            >
+              Update
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

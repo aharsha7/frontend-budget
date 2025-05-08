@@ -7,6 +7,7 @@ import UpdateTransactionModal from "../components/UpdateTransactionModal";
 import api from "../services/ApiUrl";
 import TransactionTable from "../components/TransactionTable";
 import TransactionCharts from "../components/TransactionCharts";
+import axios from "axios";
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -14,8 +15,7 @@ function Dashboard() {
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [showAddBudgetModal, setShowAddBudgetModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
-  const [showUpdateTransactionModal, setShowUpdateTransactionModal] =
-    useState(false);
+  const [showUpdateTransactionModal, setShowUpdateTransactionModal] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
 
   const now = new Date();
@@ -35,9 +35,20 @@ function Dashboard() {
 
   const fetchTransactions = async () => {
     try {
-      const res = await api.get("/transactions/get");
-      setTransactions(res.data);
-      filterTransactions(res.data, selectedMonth, selectedYear, searchQuery);
+
+      const accessToken = localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization:`Bearer ${accessToken}`,
+        }
+      }
+      const res = await axios.get("http://localhost:5000/api/transactions/get", config);
+      // console.log(res)
+      const reversedData = [...res.data].reverse();
+      // console.log(reversedData)
+      setTransactions(reversedData);
+      filterTransactions(reversedData, selectedMonth, selectedYear, searchQuery);
+      
     } catch (err) {
       console.error("Failed to fetch transactions:", err);
     }
@@ -72,6 +83,10 @@ function Dashboard() {
       selectedYear,
       searchQuery
     );
+  };
+
+  const handleBudgetAdded = (newTransaction) => {
+    setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]); 
   };
 
   const handleMonthChange = (e) => {
@@ -128,6 +143,8 @@ function Dashboard() {
               />
             </div>
           </div>
+         
+
           {/* Add Budget Button */}
           <div className="flex items-center ml-6 mb-4">
             <button
@@ -138,12 +155,18 @@ function Dashboard() {
             </button>
           </div>
         </div>
+
+        <TransactionCharts
+            transactions={filteredTransactions}
+            refreshTransactions={fetchTransactions}
+          />
+
         {/* Render filtered transactions in the transaction table */}
         {filteredTransactions.length > 0 ? (
           <TransactionTable
-            transactions={filteredTransactions} // Ensure only filtered transactions are passed here
-            setTransactions={handleTransactionsUpdate} // Use the new handler function
-            refreshTransactions={fetchTransactions} // Pass down refresh function
+            transactions={filteredTransactions} 
+            setTransactions={handleTransactionsUpdate} 
+            refreshTransactions={fetchTransactions} 
             onUpdateClick={(id) => {
               setSelectedTransactionId(id);
               setShowUpdateTransactionModal(true);
@@ -152,7 +175,7 @@ function Dashboard() {
         ) : (
           <p className="text-center text-lg">No results found.</p> // If no data matches the search
         )}
-        <TransactionCharts transactions={filteredTransactions} />
+
         {/* Modals */}
         {showAddBudgetModal && (
           <AddBudgetModal
@@ -170,7 +193,6 @@ function Dashboard() {
             onUpdateSuccess={fetchTransactions} // Refresh transactions after update
           />
         )}
-       
       </div>
     </div>
   );
