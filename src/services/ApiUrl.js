@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const ApiUrl = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "http://localhost:5000/api || https://backend-tracker-copy-6.onrender.com",
   withCredentials: true,
   // baseURL: "http://127.0.0.1:5000/",
 });
