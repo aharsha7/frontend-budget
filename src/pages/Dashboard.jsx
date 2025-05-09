@@ -48,7 +48,7 @@ function Dashboard() {
           Authorization: `Bearer ${accessToken}`,
         },
       };
-      const res = await axios.get(
+      const res = await api.get(
         "http://localhost:5000/api/transactions/get",
         config
       );
