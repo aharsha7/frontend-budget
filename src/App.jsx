@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-import TransactionTable from "./components/TransactionTable";
+import PublicRoute from "./components/PublicRoute";
 
 const App = () => {
   const [username, setUsername] = useState(localStorage.getItem("username"));
@@ -24,11 +24,31 @@ const App = () => {
       <BrowserRouter>
         <Navbar username={username} />
         <Routes>
-          <Route path="/" element={<Login />}  />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <Signup />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-        {/* <TransactionTable /> */}
       </BrowserRouter>
     </AuthProvider>
   );
