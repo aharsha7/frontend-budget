@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../auth/AuthContext";
-import api from ApiUrl;
 import axios from "axios";
 
 function Login() {
@@ -17,7 +16,7 @@ function Login() {
     e.preventDefault();
     setError("");
     try {
-      const res = await api.post("api/auth/login", {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
         email,
         password,
       });
