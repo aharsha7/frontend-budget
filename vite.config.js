@@ -10,6 +10,11 @@ export default defineConfig({
     },
   },
   server: {
-    historyApiFallback: true,
+    port: 5173
   },
+  build: {
+    outDir: 'dist'
+  },
+  base: '/', // Important for routing on Vercel
 })
+
