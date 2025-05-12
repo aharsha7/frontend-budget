@@ -6,8 +6,8 @@ import api from "../services/ApiUrl"
 import axios from "axios";
 
 function Login() {
-  const [email, setEmail] = useState("aharsha7@gmail.com");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
