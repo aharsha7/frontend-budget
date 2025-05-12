@@ -17,4 +17,3 @@ export default defineConfig({
   },
   base: '/', // Important for routing on Vercel
 })
-
