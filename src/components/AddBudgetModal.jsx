@@ -101,7 +101,7 @@ function BudgetModal({ closeModal, onBudgetAdded, onBudgetUpdated, editData = nu
             onClick={closeModal}
             className="absolute right-0 top-0 text-gray-500 hover:text-gray-700"
           >
-            <i class="fa-solid fa-delete-left"></i>
+            <i className="fa-solid fa-delete-left"></i>
 
           </button>
         </h2>

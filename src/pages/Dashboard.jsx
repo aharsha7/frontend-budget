@@ -7,8 +7,8 @@ import UpdateTransactionModal from "../components/UpdateTransactionModal";
 import api from "../services/ApiUrl";
 import TransactionTable from "../components/TransactionTable";
 import TransactionCharts from "../components/TransactionCharts";
-import axios from "axios";
 import { Plus, BarChart3, List } from 'lucide-react';
+import Navbar from "../components/Navbar"; // Import the Navbar component
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -49,7 +49,7 @@ function Dashboard() {
         },
       };
       const res = await api.get(
-        "http://localhost:5000/api/transactions/get",
+        "/transactions/get",
         config
       );
       // console.log(res)
@@ -116,6 +116,8 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+     
+      
       <div className="p-6">
         {/* Budget Cards */}
         <BudgetCards

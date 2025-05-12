@@ -28,7 +28,7 @@ const Navbar = () => {
     <div className="bg-gradient-to-r from-green-600 to-gray-900 text-white flex justify-between items-center p-3">
       <h1 className="text-xl font-bold flex items-center">
         <img
-          src="/navbar2.jpeg"
+          src="/logo.png"
           alt="Navbar Logo"
           className="h-10 w-12 rounded-full mr-2"
         />
@@ -50,7 +50,7 @@ const Navbar = () => {
                 onClick={() => handleNavigate("/signup")}
                 className="bg-white text-green-700 px-4 py-2 rounded-2xl hover:bg-green-100"
               >
-                Signup
+                Sign Up
               </button>
             </>
           )}

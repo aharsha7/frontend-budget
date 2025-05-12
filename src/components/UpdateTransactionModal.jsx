@@ -104,7 +104,7 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
             onClick={closeModal}
             className="text-gray-500 hover:text-gray-700"
           >
-            <i class="fa-solid fa-delete-left"></i>
+            <i className="fa-solid fa-delete-left"></i>
           </button>
         </div>
 

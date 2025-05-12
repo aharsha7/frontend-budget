@@ -68,7 +68,7 @@ function TransactionTable({ transactions, setTransactions, onUpdateClick, refres
       <thead>
         <tr className="bg-gray-100">
           <th className="p-2 border w-10">#</th>
-          <th className="p-2 border w-28">Date</th>
+          <th className="p-2 border">Date</th>
           <th className="p-2 border break-words">Amount</th>
           <th className="p-2 border break-words">Type</th>
           <th className="p-2 border break-words">Category</th>

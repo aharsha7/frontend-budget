@@ -59,18 +59,14 @@ function Signup() {
 
       console.log("Signup response:", res.data);
 
-      if (!res.data || !res.data.token || !res.data.user) {
-        throw new Error("Invalid signup response from server");
-      }
+      // Clear any tokens so PublicRoute doesn't auto redirect
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("username");
 
-      const { token, user } = res.data;
+      notyf.success("Account created! Please log in.");
+      navigate("/"); // Go to login page
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("username", user.name || "User");
-
-      notyf.success("Account has been created. Fill in the details.");
-
-      navigate("/");
     } catch (error) {
       console.error("Signup error:", error);
 
