@@ -23,7 +23,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://backend-tracker-copy-8.onrender.com/api",
 });
 
 // Add request interceptor to attach token
