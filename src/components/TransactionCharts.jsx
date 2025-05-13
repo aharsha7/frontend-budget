@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Pie, Bar, Line } from "react-chartjs-2";
-import { 
+import {
   Chart as ChartJS,
   ArcElement,
   CategoryScale,
@@ -177,14 +177,35 @@ function TransactionCharts({ transactions }) {
     }
   };
 
+  // Common chart options to maintain responsiveness
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+          autoSkip: true,
+          maxTicksLimit: 10,
+        },
+      },
+    },
+  };
+
   return (
-    <div className="p-4">
-      <div className="border-2 shadow-2xl rounded-2xl p-6">
+    <div className="p-4 w-full">
+      <div className="border-2 shadow-2xl rounded-2xl p-4 md:p-6 overflow-hidden">
         {/* Chart View Switch Buttons */}
-        <div className="flex justify-center space-x-4 mb-6">
+        <div className="flex justify-center flex-wrap space-x-2 md:space-x-4 mb-4 md:mb-6">
           <button
             onClick={() => setView("daily")}
-            className={`px-4 py-2 rounded font-medium transition ${
+            className={`px-3 py-1 md:px-4 md:py-2 rounded font-medium transition text-sm md:text-base ${
               view === "daily"
                 ? "bg-blue-600 text-white"
                 : "bg-blue-100 text-blue-800 hover:bg-blue-200"
@@ -194,7 +215,7 @@ function TransactionCharts({ transactions }) {
           </button>
           <button
             onClick={() => setView("weekly")}
-            className={`px-4 py-2 rounded font-medium transition ${
+            className={`px-3 py-1 md:px-4 md:py-2 rounded font-medium transition text-sm md:text-base ${
               view === "weekly"
                 ? "bg-blue-600 text-white"
                 : "bg-blue-100 text-blue-800 hover:bg-blue-200"
@@ -204,7 +225,7 @@ function TransactionCharts({ transactions }) {
           </button>
           <button
             onClick={() => setView("monthly")}
-            className={`px-4 py-2 rounded font-medium transition ${
+            className={`px-3 py-1 md:px-4 md:py-2 rounded font-medium transition text-sm md:text-base ${
               view === "monthly"
                 ? "bg-blue-600 text-white"
                 : "bg-blue-100 text-blue-800 hover:bg-blue-200"
@@ -214,49 +235,48 @@ function TransactionCharts({ transactions }) {
           </button>
         </div>
 
-        {/* Charts Section */}
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
-          {/* Line/Bar Chart */}
-          <div className="bg-white shadow-lg rounded-xl p-4 w-full lg:w-[900px] h-[500px]">
-            {view === "daily" && (
-              <>
-                <h4 className="text-center font-semibold mb-2 text-blue-700">Daily Flow</h4>
-                <Line data={getChartData()} />
-              </>
-            )}
-            {view === "weekly" && (
-              <>
-                <h4 className="text-center font-semibold mb-2 text-blue-700">Weekly Flow</h4>
-                <Line data={getChartData()} />
-              </>
-            )}
-            {view === "monthly" && (
-              <>
-                <h4 className="text-center font-semibold mb-2 text-blue-700">Monthly Trend</h4>
-                <Bar data={getChartData()} />
-              </>
-            )}
+        {/* Charts Section - Made fully responsive with flexbox and grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+          {/* Line/Bar Chart - Takes 2/3 of space on large screens */}
+          <div className="bg-white shadow-lg rounded-xl p-2 md:p-4 col-span-1 lg:col-span-2">
+            <h4 className="text-center font-semibold mb-2 text-blue-700 text-sm md:text-base">
+              {view === "daily" && "Daily Flow"}
+              {view === "weekly" && "Weekly Flow"}
+              {view === "monthly" && "Monthly Trend"}
+            </h4>
+            <div className="h-64 md:h-96 w-full">
+              {view === "monthly" ? (
+                <Bar data={getChartData()} options={chartOptions} />
+              ) : (
+                <Line data={getChartData()} options={chartOptions} />
+              )}
+            </div>
           </div>
 
-          {/* Pie Chart */}
-          <div className="bg-white shadow-lg rounded-xl p-4 w-full lg:w-[400px] h-[500px]">
-            <h4 className="text-center font-semibold mb-2 text-blue-700">Income vs Expense</h4>
-            <Pie
-              data={pieData}
-              options={{
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: "top",
+          {/* Pie Chart - Takes 1/3 of space on large screens */}
+          <div className="bg-white shadow-lg rounded-xl p-2 md:p-4 col-span-1">
+            <h4 className="text-center font-semibold mb-2 text-blue-700 text-sm md:text-base">
+              Income vs Expense
+            </h4>
+            <div className="h-64 md:h-96 w-full">
+              <Pie
+                data={pieData}
+                options={{
+                  maintainAspectRatio: false,
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: "top",
+                    },
                   },
-                },
-              }}
-            />
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 export default TransactionCharts;

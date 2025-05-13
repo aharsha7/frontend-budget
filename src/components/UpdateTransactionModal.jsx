@@ -3,14 +3,20 @@ import api from "../services/ApiUrl";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 
-function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess }) {
+function UpdateTransactionModal({
+  txnId,
+  closeModal,
+  categories,
+  onUpdateSuccess,
+}) {
   const [amount, setAmount] = useState("");
-  const [txnType, setTxnType] = useState("expense");
+  const [txnType, setTxnType] = useState("");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
 
   const notyf = new Notyf({
     duration: 3000,
@@ -37,10 +43,33 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
+
         const txn = res.data;
+        console.log("Fetched txn data:", txn);
+
         setAmount(txn.amount);
-        setTxnType(txn.transaction_type);
-        setCategory(txn.category);
+        const type = txn.transaction_type?.trim().toLowerCase();
+        setTxnType(type === "income" || type === "expense" ? type : "expense");
+
+        const predefinedCategories = ["Food", "Travel", "General", "Shopping"];
+        const allCategoryNames = categories
+          ? categories.map((cat) => cat.name)
+          : [];
+        const isExistingCategory = [
+          ...predefinedCategories,
+          ...allCategoryNames,
+        ].includes(txn.category);
+
+        if (isExistingCategory) {
+          setCategory(txn.category);
+          setNewCategory("");
+          setIsCustomCategory(false);
+        } else {
+          setCategory("");
+          setNewCategory(txn.category);
+          setIsCustomCategory(true);
+        }
+
         setDescription(txn.description || "");
         setDate(txn.date);
       } catch (err) {
@@ -52,13 +81,13 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
     if (txnId) {
       fetchTransaction();
     }
-  }, [txnId]);
+  }, [txnId, categories]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    const finalCategory = newCategory.trim() !== "" ? newCategory : category;
+    const finalCategory = isCustomCategory ? newCategory.trim() : category;
 
     if (!finalCategory) {
       setError("Please select or enter a category");
@@ -73,19 +102,14 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
       date,
     };
 
-    console.log("Updating transaction with payload:", payload);
-
     try {
-      const response = await api.put(`/transactions/put/${txnId}`, payload, {
+      await api.put(`/transactions/put/${txnId}`, payload, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      console.log("Update response:", response.data);
 
-      if (onUpdateSuccess) {
-        onUpdateSuccess();
-      }
+      onUpdateSuccess && onUpdateSuccess();
       notyf.success("Budget updated successfully!");
       closeModal();
     } catch (err) {
@@ -148,39 +172,38 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
               required
               className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select Type</option>
+              {/* <option value="">Select Type</option> */}
               <option value="income">Income</option>
               <option value="expense">Expense</option>
             </select>
           </div>
 
-          {/* Category Selection */}
+          {/* Category */}
           <div className="mb-4">
             <label className="block text-gray-700 mb-1">Category</label>
-            <div className="mb-2">
-              <select
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  if (e.target.value) {
-                    setNewCategory("");
-                  }
-                }}
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a Category</option>
-                <option value="Food">Food</option>
-                <option value="Travel">Travel</option>
-                <option value="General">General</option>
-                <option value="Shopping">Shopping</option>
-                {categories &&
-                  categories.map((cat) => (
-                    <option key={cat.id || cat.name} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
+            <select
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                if (e.target.value) {
+                  setNewCategory("");
+                  setIsCustomCategory(false);
+                }
+              }}
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select a Category</option>
+              <option value="Food">Food</option>
+              <option value="Travel">Travel</option>
+              <option value="General">General</option>
+              <option value="Shopping">Shopping</option>
+              {categories &&
+                categories.map((cat) => (
+                  <option key={cat.id || cat.name} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+            </select>
 
             <div className="mt-2">
               <label className="block text-gray-700 mb-1">
@@ -195,6 +218,7 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
                   setNewCategory(e.target.value);
                   if (e.target.value.trim() !== "") {
                     setCategory("");
+                    setIsCustomCategory(true);
                   }
                 }}
               />
@@ -214,9 +238,8 @@ function UpdateTransactionModal({ txnId, closeModal, categories, onUpdateSuccess
             />
           </div>
 
-          {/* Buttons */}
+          {/* Submit */}
           <div className="flex justify-center">
-            
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 hover:bg-orange-400 text-white rounded transition-colors"
