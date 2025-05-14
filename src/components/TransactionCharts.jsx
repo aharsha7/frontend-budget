@@ -189,8 +189,8 @@ function TransactionCharts({ transactions }) {
     scales: {
       x: {
         ticks: {
-          maxRotation: 45,
-          minRotation: 45,
+          maxRotation: 0,
+          minRotation: 0,
           autoSkip: true,
           maxTicksLimit: 10,
         },
