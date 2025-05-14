@@ -19,6 +19,13 @@ function TransactionTable({ transactions, setTransactions, onUpdateClick, refres
     onUpdateClick(id); // Open modal with selected transaction
   };
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const handleDelete = async () => {
     try {
       const accessToken = localStorage.getItem("token");
