@@ -38,8 +38,8 @@ function BudgetCards({ transactions }) {
         {/* Income */}
         <div className="flex-1 min-w-[150px] p-4 rounded-lg shadow-md flex flex-col items-center">
           <Coins className="text-green-500 w-8 h-8 mb-2" />
-          <h3 className="text-md font-semibold">Income</h3>
-          <p className="text-md">
+          <h3 className="text-xl font-semibold">Income</h3>
+          <p className="text-lg">
             {renderValueWithArrow(totalIncome)}
           </p>
         </div>
@@ -47,8 +47,8 @@ function BudgetCards({ transactions }) {
         {/* Expense */}
         <div className="flex-1 min-w-[150px] p-4 rounded-lg shadow-md flex flex-col items-center">
           <ShoppingCart className="text-red-500 w-8 h-8 mb-2" />
-          <h3 className="text-md font-semibold">Expense</h3>
-          <p className="text-md">
+          <h3 className="text-xl font-semibold">Expense</h3>
+          <p className="text-lg">
             {renderValueWithArrow(-totalExpense)}
           </p>
         </div>
@@ -56,8 +56,8 @@ function BudgetCards({ transactions }) {
         {/* Remaining */}
         <div className="flex-1 min-w-[150px] p-4 rounded-lg shadow-md flex flex-col items-center">
           <PiggyBank className="text-yellow-500 w-8 h-8 mb-2" />
-          <h3 className="text-md font-semibold">Remaining</h3>
-          <p className="text-md">
+          <h3 className="text-xl font-semibold">Remaining</h3>
+          <p className="text-lg">
             {renderValueWithArrow(remainingAmount)}
           </p>
         </div>
