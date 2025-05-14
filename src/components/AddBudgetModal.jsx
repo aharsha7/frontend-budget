@@ -7,6 +7,13 @@ function BudgetModal({ closeModal, onBudgetAdded, onBudgetUpdated, editData = nu
   const isEditMode = !!editData;
   const notyf = new Notyf({ duration: 3000, position: { x: "right", y: "top" } });
 
+    useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const [budgetForm, setBudgetForm] = useState({
     amount: "",
     transaction_type: "expense",
