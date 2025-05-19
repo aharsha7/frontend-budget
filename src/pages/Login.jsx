@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../auth/AuthContext";
-import api from "../services/ApiUrl"
+import api from "../services/ApiUrl";
 import axios from "axios";
 
 function Login() {
@@ -10,12 +10,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     try {
       const res = await api.post("/auth/login", {
         email,
@@ -27,6 +29,8 @@ function Login() {
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,6 +68,15 @@ function Login() {
               <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
                 Budget Tracker Login
               </h2>
+
+              {/* Please Wait Message */}
+              {loading && (
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-2 rounded mb-3">
+                  <p className="text-blue-700 text-sm">
+                    Please wait for the page to login. Few seconds.
+                  </p>
+                </div>
+              )}
 
               {/* Email Input */}
               <div className="mb-6">
@@ -113,7 +126,10 @@ function Login() {
               )}
 
               {/* Login Button */}
-              <button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 rounded-lg hover:rounded-full hover:from-green-700 hover:to-green-800">
+              <button
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 rounded-lg hover:rounded-full hover:from-green-700 hover:to-green-800"
+                disabled={loading}
+              >
                 Login
               </button>
 
