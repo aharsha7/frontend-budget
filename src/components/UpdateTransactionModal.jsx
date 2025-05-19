@@ -18,6 +18,13 @@ function UpdateTransactionModal({
   const [error, setError] = useState("");
   const [isCustomCategory, setIsCustomCategory] = useState(false);
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const notyf = new Notyf({
     duration: 3000,
     position: { x: "right", y: "top" },

@@ -1,9 +1,17 @@
-import React from "react";
+import { useEffect } from "react";
 
 function ConfirmModal({ message, onConfirm, onCancel }) {
+
+      useEffect(() => {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }, []);
+
   return (
     <div className="fixed inset-0 flex items-center justify-center rounded-lg bg-gray-600 bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-md w-full max-w-sm shadow-lg relative">
+      <div className="bg-white p-6 rounded-xl w-full max-w-sm shadow-lg relative">
         <div className="flex justify-end">
           <button
             onClick={onCancel}
